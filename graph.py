@@ -43,7 +43,7 @@ class Graph:
 
 
     #alg for unweighted graph (dist=0 for all city connections)
-    def find_path_BFS(self, start_name: str, target_name: str) -> List:
+    def shortest_path_BFS(self, start_name: str, target_name: str) -> List:
         
         #edge case
         if start_name not in self.nodes or target_name not in self.nodes:
@@ -85,7 +85,7 @@ class Graph:
         return reconstructed_path[::-1]
 
     #alg for weighted graph (varying connection dists)
-    def shortest_path(self, start_name: str, target_name: str) -> Tuple[List[str], float]:
+    def shortest_path_Djikstra(self, start_name: str, target_name: str) -> Tuple[List[str], float]:
         #edge case for invalid start/target lcoations 
         if start_name not in self.nodes or target_name not in self.nodes:
             return [], float('inf')
@@ -145,7 +145,7 @@ if __name__ == "__main__":
     start_loc = "Downtown"
     end_loc = "Airport"
     
-    shortest_path, total_miles = router.shortest_path(start_loc, end_loc)
+    shortest_path, total_miles = router.shortest_path_Djikstra(start_loc, end_loc)
     
     print(f"Calculating optimal path from {start_loc} to {end_loc}...")
     if shortest_path:
