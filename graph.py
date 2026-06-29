@@ -1,6 +1,7 @@
 from collections import deque
 from typing import List, Tuple, Dict, Optional
 import heapq
+import json
 
 class Node:
     def __init__(self, name: str):
@@ -125,35 +126,110 @@ class Graph:
             curr_city = previous[curr_city]
         
         return path[::1], distances[target_name]
+    
+    def save_to_file(self, filename: str) -> None:
+        export_data = {}
+        
+        for source_name, node_obj in self.nodes.items():
+            export_data[source_name] = []
+            for edge in node_obj.edges:
+                export_data[source_name].append({
+                    'target': edge.target_name,
+                    'distance': edge.distance
+                })
+        
+        with open(filename, 'w') as f:
+            json.dump(export_data, f, indent=4)
+
+    def load_from_file(self, filename: str) -> None:
+        with open(filename, 'r') as f:
+            import_data = json.load(f)
+
+        self.nodes.clear()
+        loaded_edges = set()
+         
+        for source, edges in import_data.items():
+            for edge_info in edges:
+                target = edge_info['target']
+                dist = edge_info['distance']
+
+                edge_signiture = tuple(sorted([source, target]))
+
+                if edge_signiture not in loaded_edges:
+                    self.add_edge(source, target, dist, is_bidirectional=True)
+                    loaded_edges.add(edge_signiture)
+
+#file saver / parser testing
+if __name__ == "__main__":
+    # === STEP 1: Build the Original Network ===
+    print("Creating original graph network...")
+    original_graph = Graph()
+    original_graph.add_edge("Downtown", "Midtown", 4.2)
+    original_graph.add_edge("Midtown", "Uptown", 5.1)
+    original_graph.add_edge("Midtown", "Suburbs", 8.0)
+    original_graph.add_edge("Uptown", "Suburbs", 3.3)
+    
+    # Calculate a baseline path to compare against later
+    orig_path, orig_dist = original_graph.shortest_path_Djikstra("Downtown", "Suburbs")
+    print(f"Original path calculation: {' -> '.join(orig_path)} ({orig_dist}km)")
+
+    # === STEP 2: Export to JSON ===
+    test_filename = "validation_map.json"
+    print(f"\nSaving network configuration out to '{test_filename}'...")
+    original_graph.save_to_file(test_filename)
+
+    # === STEP 3: Initialize a Fresh, Empty Graph ===
+    print("\nInitializing a completely blank second graph workspace...")
+    new_graph = Graph()
+    print(f"Active nodes in new graph before load: {list(new_graph.nodes.keys())}")
+
+    # === STEP 4: Import the Saved JSON Data ===
+    print(f"\nLoading data back from '{test_filename}' into the blank workspace...")
+    new_graph.load_from_file(test_filename)
+    print(f"Active nodes in new graph after load: {list(new_graph.nodes.keys())}")
+
+    # === STEP 5: Run Comparative Validation ===
+    print("\nRunning final routing engine validation checks...")
+    new_path, new_dist = new_graph.shortest_path_Djikstra("Downtown", "Suburbs")
+    print(f"Post-load path calculation: {' -> '.join(new_path)} ({new_dist}km)")
+
+    print("\n================ VERDICT ================")
+    if orig_path == new_path and orig_dist == new_dist:
+        print("SUCCESS! The data persistence round-trip is flawless.")
+        print("The reconstructed graph yields identical routing results.")
+    else:
+        print("FAILURE: The loaded map does not match the original layout data.")
+    print("=========================================")
+
 
 
 #functional testing
-if __name__ == "__main__":
-    router = Graph()
+# if __name__ == "__main__":
+#     router = Graph()
     
-    router.add_edge("Downtown", "Suburbs", 14.5)
-    router.add_edge("Downtown", "Midtown", 4.2)
-    router.add_edge("Midtown", "Uptown", 5.1)
-    router.add_edge("Midtown", "Suburbs", 8.0)
-    router.add_edge("Uptown", "Suburbs", 3.3)
-    router.add_edge("Suburbs", "Airport", 22.1)
+#     router.add_edge("Downtown", "Suburbs", 14.5)
+#     router.add_edge("Downtown", "Midtown", 4.2)
+#     router.add_edge("Midtown", "Uptown", 5.1)
+#     router.add_edge("Midtown", "Suburbs", 8.0)
+#     router.add_edge("Uptown", "Suburbs", 3.3)
+#     router.add_edge("Suburbs", "Airport", 22.1)
     
-    print("--- Current Graph Architecture ---")
-    router.display_graph()
-    print("\n----------------------------------")
+#     print("--- Current Graph Architecture ---")
+#     router.display_graph()
+#     print("\n----------------------------------")
     
-    start_loc = "Downtown"
-    end_loc = "Airport"
+#     start_loc = "Downtown"
+#     end_loc = "Airport"
     
-    shortest_path, total_miles = router.shortest_path_Djikstra(start_loc, end_loc)
+#     shortest_path, total_miles = router.shortest_path_Djikstra(start_loc, end_loc)
     
-    print(f"Calculating optimal path from {start_loc} to {end_loc}...")
-    if shortest_path:
-        path_str = " -> ".join(shortest_path)
-        print(f"Optimal Route Found: {path_str}")
-        print(f"Total Traveled Distance: {total_miles} km")
-    else:
-        print(f"Error: Route from {start_loc} to {end_loc} is disconnected.")
+#     print(f"Calculating optimal path from {start_loc} to {end_loc}...")
+#     if shortest_path:
+#         path_str = " -> ".join(shortest_path)
+#         print(f"Optimal Route Found: {path_str}")
+#         print(f"Total Traveled Distance: {total_miles} km")
+#     else:
+#         print(f"Error: Route from {start_loc} to {end_loc} is disconnected.")
 
 
 # if __name__ == "__main__":

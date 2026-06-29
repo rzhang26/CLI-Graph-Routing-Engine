@@ -1,0 +1,42 @@
+{
+    "Downtown": [
+        {
+            "target": "Midtown",
+            "distance": 4.2
+        }
+    ],
+    "Midtown": [
+        {
+            "target": "Downtown",
+            "distance": 4.2
+        },
+        {
+            "target": "Uptown",
+            "distance": 5.1
+        },
+        {
+            "target": "Suburbs",
+            "distance": 8.0
+        }
+    ],
+    "Uptown": [
+        {
+            "target": "Midtown",
+            "distance": 5.1
+        },
+        {
+            "target": "Suburbs",
+            "distance": 3.3
+        }
+    ],
+    "Suburbs": [
+        {
+            "target": "Midtown",
+            "distance": 8.0
+        },
+        {
+            "target": "Uptown",
+            "distance": 3.3
+        }
+    ]
+}
